@@ -1,59 +1,59 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
-  <meta http-equiv="Pragma" content="no-cache" />
-  <meta http-equiv="Expires" content="0" />
-  <title>Visual Reminders</title>
-  <link rel="stylesheet" href="style.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+<meta http-equiv="Pragma" content="no-cache" />
+<meta http-equiv="Expires" content="0" />
+<title>Visual Reminders</title>
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div id="app">
+<div id="app">
     <button id="addReminderBtn">+ New Reminder</button>
     <canvas id="balloonCanvas"></canvas>
-  </div>
+</div>
 
-  <!-- Modal for new reminder -->
-  <div id="reminderModal" class="modal hidden">
+<!-- Modal for new reminder -->
+<div id="reminderModal" class="modal hidden">
     <div class="modal-content">
-      <span id="closeModal" class="close">×</span>
-      <h2>New Reminder</h2>
+        <span id="closeModal" class="close">×</span>
+        <h2>New Reminder</h2>
 
-      <label>Title</label>
-      <input type="text" id="reminderTitle">
+        <label>Title</label>
+        <input type="text" id="reminderTitle">
 
-      <label>Year</label>
-      <select id="reminderYear"></select>
+        <label>Year</label>
+        <select id="reminderYear"></select>
 
-      <label>Month</label>
-      <select id="reminderMonth"></select>
+        <label>Month</label>
+        <select id="reminderMonth"></select>
 
-      <label>Day</label>
-      <select id="reminderDay"></select>
+        <label>Day</label>
+        <select id="reminderDay"></select>
 
-      <label>Time</label>
-      <div id="timeRow">
-        <select id="reminderHour"></select>
-        <select id="reminderMinute"></select>
-        <select id="reminderAMPM">
-          <option>AM</option>
-          <option>PM</option>
+        <label>Time</label>
+        <div id="timeRow">
+            <select id="reminderHour"></select>
+            <select id="reminderMinute"></select>
+            <select id="reminderAMPM">
+                <option>AM</option>
+                <option>PM</option>
+            </select>
+        </div>
+
+        <label>Importance (1-5)</label>
+        <select id="reminderImportance">
+            <option>1</option><option>2</option><option>3</option><option>4</option><option>5</option>
         </select>
-      </div>
 
-      <label>Importance (1-5)</label>
-      <select id="reminderImportance">
-        <option>1</option><option>2</option><option>3</option><option>4</option><option>5</option>
-      </select>
-
-      <button id="saveReminderBtn">Save Reminder</button>
+        <button id="saveReminderBtn">Save Reminder</button>
     </div>
-  </div>
+</div>
 
-  <script src="app.js"></script>
+<script src="app.js"></script>
 </body>
 </html>
