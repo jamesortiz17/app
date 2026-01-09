@@ -9,6 +9,10 @@ canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 
 let reminders = [];
+let usedColors = [];
+
+// Rainbow calm colors
+const rainbowColors = ["#fca5a5","#fdba74","#fef08a","#86efac","#93c5fd","#f9a8d4"];
 
 // ------------------ Populate dropdowns ------------------
 function populateDropdowns() {
@@ -25,7 +29,6 @@ function populateDropdowns() {
         yearSelect.innerHTML += `<option>${y}</option>`;
     }
 
-    // Months
     function updateMonths() {
         const selectedYear = parseInt(yearSelect.value);
         monthSelect.innerHTML = "";
@@ -36,7 +39,6 @@ function populateDropdowns() {
         updateDays();
     }
 
-    // Days
     function updateDays() {
         const selectedYear = parseInt(yearSelect.value);
         const selectedMonth = parseInt(monthSelect.value);
@@ -54,12 +56,12 @@ function populateDropdowns() {
     for (let h = 1; h <= 12; h++) hourSelect.innerHTML += `<option>${h}</option>`;
     // Minutes 0-59
     minuteSelect.innerHTML = "";
-    for (let m = 0; m < 60; m++) minuteSelect.innerHTML += `<option>${m.toString().padStart(2, "0")}</option>`;
+    for (let m = 0; m < 60; m++) minuteSelect.innerHTML += `<option>${m.toString().padStart(2,"0")}</option>`;
 
     yearSelect.onchange = updateMonths;
     monthSelect.onchange = updateDays;
 
-    updateMonths(); // initialize
+    updateMonths();
 }
 
 // ------------------ Modal open/close ------------------
@@ -84,53 +86,60 @@ saveBtn.onclick = () => {
     let deadline = new Date(year, month, day, hour, minute);
 
     const now = new Date();
-    if (deadline < now) deadline = new Date(now.getTime() + 60 * 1000);
+    if(deadline < now) deadline = new Date(now.getTime() + 60 * 1000);
 
-    // Balloon colors (light calm)
-    const colors = ["#fca5a5","#fdba74","#fef08a","#86efac","#93c5fd","#f9a8d4"];
-    const color = colors[Math.floor(Math.random()*colors.length)];
+    // ------------------ Unique color ------------------
+    let availableColors = rainbowColors.filter(c => !usedColors.includes(c));
+    if (availableColors.length === 0) usedColors = [];
+    const color = availableColors[Math.floor(Math.random()*availableColors.length)];
+    usedColors.push(color);
 
-    // Pre-calculate size based on urgency & importance
-    const diffDays = Math.max(1, (deadline - now) / (1000 * 60 * 60 * 24)); // min 1 day
-    let radius = 30 + importance*10 + 200/Math.sqrt(diffDays); // closer = bigger
+    // ------------------ Size calculation ------------------
+    // Date contributes ~80%, importance 20%
+    const diffDays = Math.max(1, (deadline - now)/(1000*60*60*24));
+    const dateFactor = Math.min(1, 7/Math.sqrt(diffDays)); // 1 = today, smaller as further away
+    const importanceFactor = importance / 5;
+    const minRadius = 25;
+    const radius = minRadius + dateFactor*80*0.8 + importanceFactor*80*0.2; // combined
 
-    // Position non-overlapping & inside canvas
+    // ------------------ Position non-overlapping ------------------
     let x, y, safe, attempts = 0;
-    while (true) {
+    while(true){
         x = Math.random() * (canvas.width - 2*radius) + radius;
         y = Math.random() * (canvas.height - 2*radius) + radius;
-        safe = reminders.every(r => Math.hypot(r.x - x, r.y - y) > r.radius + radius + 10);
-        if (safe || attempts > 200) break;
+        safe = reminders.every(r => Math.hypot(r.x-x,r.y-y) > r.radius + radius + 10);
+        if(safe || attempts>200) break;
         attempts++;
     }
 
-    // If couldn't fit after many attempts, reduce size
-    while (!safe && radius > 20) {
-        radius -= 5;
-        x = Math.random() * (canvas.width - 2*radius) + radius;
-        y = Math.random() * (canvas.height - 2*radius) + radius;
-        safe = reminders.every(r => Math.hypot(r.x - x, r.y - y) > r.radius + radius + 10);
+    // Reduce size if couldn't fit
+    let reducedRadius = radius;
+    while(!safe && reducedRadius>20){
+        reducedRadius -= 5;
+        x = Math.random() * (canvas.width - 2*reducedRadius) + reducedRadius;
+        y = Math.random() * (canvas.height - 2*reducedRadius) + reducedRadius;
+        safe = reminders.every(r => Math.hypot(r.x-x,r.y-y) > r.radius + reducedRadius + 10);
     }
 
-    reminders.push({title, deadline, importance, color, x, y, radius});
+    reminders.push({title, deadline, importance, color, x, y, radius: reducedRadius});
     modal.classList.add("hidden");
 }
 
 // ------------------ Draw loop ------------------
 function draw() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.clearRect(0,0,canvas.width,canvas.height);
 
-    reminders.forEach(r => {
+    reminders.forEach(r=>{
         // Balloon
         ctx.beginPath();
-        ctx.arc(r.x, r.y, r.radius, 0, Math.PI*2);
-        ctx.fillStyle = r.color;
+        ctx.arc(r.x,r.y,r.radius,0,Math.PI*2);
+        ctx.fillStyle=r.color;
         ctx.fill();
         ctx.closePath();
 
         // Title
         ctx.fillStyle="#111827";
-        ctx.font = `${Math.min(24, r.radius/2)}px -apple-system`;
+        ctx.font = `${Math.min(24,r.radius/2)}px -apple-system`;
         ctx.textAlign="center";
         ctx.textBaseline="middle";
         ctx.fillText(r.title, r.x, r.y);
@@ -140,14 +149,14 @@ function draw() {
 }
 
 // ------------------ Click to pop ------------------
-canvas.addEventListener("click", e => {
-    for (let i=0; i<reminders.length; i++) {
+canvas.addEventListener("click", e=>{
+    for(let i=0;i<reminders.length;i++){
         const r = reminders[i];
         const dx = e.offsetX - r.x;
         const dy = e.offsetY - r.y;
-        if (Math.hypot(dx, dy) <= r.radius) {
+        if(Math.hypot(dx,dy)<=r.radius){
             // Confetti
-            for (let j=0; j<20; j++) {
+            for(let j=0;j<20;j++){
                 const dx = Math.random()*40-20;
                 const dy = Math.random()*40-20;
                 ctx.beginPath();
