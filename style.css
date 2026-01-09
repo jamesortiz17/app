@@ -1,85 +1,86 @@
 body {
-  margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
-  background: #f8fafc;
-  overflow: hidden;
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
+    background: #f8fafc;
+    overflow: hidden;
 }
 
 #app {
-  position: relative;
-  width: 100vw;
-  height: 100vh;
+    position: relative;
+    width: 100vw;
+    height: 100vh;
 }
 
 #addReminderBtn {
-  position: absolute;
-  top: 20px;
-  left: 20px;
-  background: #e0e7ff;
-  color: #1e3a8a;
-  border: none;
-  padding: 12px 20px;
-  font-size: 16px;
-  border-radius: 12px;
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    background: #e0e7ff;
+    color: #1e3a8a;
+    border: none;
+    padding: 12px 20px;
+    font-size: 16px;
+    border-radius: 12px;
+    cursor: pointer;
 }
 
 canvas {
-  width: 100%;
-  height: 100%;
-  display: block;
+    width: 100%;
+    height: 100%;
+    display: block;
 }
 
 .modal {
-  position: fixed;
-  top:0; left:0;
-  width: 100vw;
-  height: 100vh;
-  background: rgba(0,0,0,0.3);
-  display: flex;
-  align-items: center;
-  justify-content: center;
+    position: fixed;
+    top:0; left:0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0,0,0,0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .modal.hidden { display: none; }
 
 .modal-content {
-  background: #fff;
-  padding: 20px;
-  border-radius: 16px;
-  width: 90%;
-  max-width: 400px;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  position: relative;
+    background: #fff;
+    padding: 20px;
+    border-radius: 16px;
+    width: 90%;
+    max-width: 400px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    position: relative;
 }
 
 .modal-content h2 {
-  margin: 0;
-  color: #1e3a8a;
+    margin: 0;
+    color: #1e3a8a;
 }
 
 .modal-content label {
-  font-weight: 500;
-  color: #6b7280;
+    font-weight: 500;
+    color: #6b7280;
 }
 
 .modal-content input, .modal-content select {
-  padding: 8px;
-  border-radius: 8px;
-  border: 1px solid #d1d5db;
-  font-size: 14px;
+    padding: 8px;
+    border-radius: 8px;
+    border: 1px solid #d1d5db;
+    font-size: 14px;
 }
 
 #timeRow {
-  display: flex;
-  gap: 5px;
+    display: flex;
+    gap: 5px;
 }
 
 .close {
-  position: absolute;
-  right: 12px;
-  top: 12px;
-  font-size: 20px;
-  cursor: pointer;
+    position: absolute;
+    right: 12px;
+    top: 12px;
+    font-size: 20px;
+    cursor: pointer;
 }
