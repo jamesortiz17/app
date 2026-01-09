@@ -21,33 +21,45 @@ function populateDropdowns() {
 
     // Years: current + next 5
     yearSelect.innerHTML = "";
-    for(let y=now.getFullYear(); y<=now.getFullYear()+5; y++){
+    for (let y = now.getFullYear(); y <= now.getFullYear() + 5; y++) {
         yearSelect.innerHTML += `<option>${y}</option>`;
     }
 
     // Months
-    monthSelect.innerHTML = "";
-    for(let m=1; m<=12; m++){
-        monthSelect.innerHTML += `<option>${m}</option>`;
+    function updateMonths() {
+        const selectedYear = parseInt(yearSelect.value);
+        monthSelect.innerHTML = "";
+        const startMonth = selectedYear === now.getFullYear() ? now.getMonth() + 1 : 1;
+        for (let m = startMonth; m <= 12; m++) {
+            monthSelect.innerHTML += `<option>${m}</option>`;
+        }
+        updateDays();
     }
 
     // Days
-    daySelect.innerHTML = "";
-    for(let d=1; d<=31; d++){
-        daySelect.innerHTML += `<option>${d}</option>`;
+    function updateDays() {
+        const selectedYear = parseInt(yearSelect.value);
+        const selectedMonth = parseInt(monthSelect.value);
+        daySelect.innerHTML = "";
+        const isCurrentMonth = selectedYear === now.getFullYear() && selectedMonth === now.getMonth() + 1;
+        const startDay = isCurrentMonth ? now.getDate() : 1;
+        const daysInMonth = new Date(selectedYear, selectedMonth, 0).getDate();
+        for (let d = startDay; d <= daysInMonth; d++) {
+            daySelect.innerHTML += `<option>${d}</option>`;
+        }
     }
 
     // Hours 1-12
     hourSelect.innerHTML = "";
-    for(let h=1; h<=12; h++){
-        hourSelect.innerHTML += `<option>${h}</option>`;
-    }
-
+    for (let h = 1; h <= 12; h++) hourSelect.innerHTML += `<option>${h}</option>`;
     // Minutes 0-59
     minuteSelect.innerHTML = "";
-    for(let m=0; m<60; m++){
-        minuteSelect.innerHTML += `<option>${m.toString().padStart(2,'0')}</option>`;
-    }
+    for (let m = 0; m < 60; m++) minuteSelect.innerHTML += `<option>${m.toString().padStart(2, "0")}</option>`;
+
+    yearSelect.onchange = updateMonths;
+    monthSelect.onchange = updateDays;
+
+    updateMonths(); // initialize
 }
 
 // ------------------ Modal open/close ------------------
@@ -57,40 +69,47 @@ closeModal.onclick = () => modal.classList.add("hidden");
 // ------------------ Save reminder ------------------
 saveBtn.onclick = () => {
     const title = document.getElementById("reminderTitle").value.trim();
-    if(!title) return alert("Enter a title!");
+    if (!title) return alert("Enter a title!");
 
     let year = parseInt(document.getElementById("reminderYear").value);
-    let month = parseInt(document.getElementById("reminderMonth").value)-1;
+    let month = parseInt(document.getElementById("reminderMonth").value) - 1;
     let day = parseInt(document.getElementById("reminderDay").value);
     let hour = parseInt(document.getElementById("reminderHour").value);
     const minute = parseInt(document.getElementById("reminderMinute").value);
     const ampm = document.getElementById("reminderAMPM").value;
-    if(ampm==="PM" && hour<12) hour+=12;
-    if(ampm==="AM" && hour===12) hour=0;
+    if (ampm === "PM" && hour < 12) hour += 12;
+    if (ampm === "AM" && hour === 12) hour = 0;
 
     let importance = parseInt(document.getElementById("reminderImportance").value);
     let deadline = new Date(year, month, day, hour, minute);
 
     const now = new Date();
-    if(deadline < now) deadline = new Date(now.getTime()+60*1000);
+    if (deadline < now) deadline = new Date(now.getTime() + 60 * 1000);
 
-    // Balloon colors
+    // Balloon colors (light calm)
     const colors = ["#fca5a5","#fdba74","#fef08a","#86efac","#93c5fd","#f9a8d4"];
     const color = colors[Math.floor(Math.random()*colors.length)];
 
     // Pre-calculate size based on urgency & importance
-    const diffDays = Math.max(1, (deadline-now)/(1000*60*60*24)); // min 1 day
+    const diffDays = Math.max(1, (deadline - now) / (1000 * 60 * 60 * 24)); // min 1 day
     let radius = 30 + importance*10 + 200/Math.sqrt(diffDays); // closer = bigger
 
-    // Position non-overlapping
-    let x,y,safe;
-    for(let attempt=0; attempt<100; attempt++){
-        x = Math.random()*(canvas.width-2*radius)+radius;
-        y = Math.random()*(canvas.height-2*radius)+radius;
-        safe = reminders.every(r=>{
-            return Math.hypot(r.x-x, r.y-y) > r.radius + radius + 10;
-        });
-        if(safe) break;
+    // Position non-overlapping & inside canvas
+    let x, y, safe, attempts = 0;
+    while (true) {
+        x = Math.random() * (canvas.width - 2*radius) + radius;
+        y = Math.random() * (canvas.height - 2*radius) + radius;
+        safe = reminders.every(r => Math.hypot(r.x - x, r.y - y) > r.radius + radius + 10);
+        if (safe || attempts > 200) break;
+        attempts++;
+    }
+
+    // If couldn't fit after many attempts, reduce size
+    while (!safe && radius > 20) {
+        radius -= 5;
+        x = Math.random() * (canvas.width - 2*radius) + radius;
+        y = Math.random() * (canvas.height - 2*radius) + radius;
+        safe = reminders.every(r => Math.hypot(r.x - x, r.y - y) > r.radius + radius + 10);
     }
 
     reminders.push({title, deadline, importance, color, x, y, radius});
@@ -99,9 +118,9 @@ saveBtn.onclick = () => {
 
 // ------------------ Draw loop ------------------
 function draw() {
-    ctx.clearRect(0,0,canvas.width,canvas.height);
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    reminders.forEach((r,i)=>{
+    reminders.forEach(r => {
         // Balloon
         ctx.beginPath();
         ctx.arc(r.x, r.y, r.radius, 0, Math.PI*2);
@@ -121,14 +140,14 @@ function draw() {
 }
 
 // ------------------ Click to pop ------------------
-canvas.addEventListener("click", e=>{
-    for(let i=0;i<reminders.length;i++){
+canvas.addEventListener("click", e => {
+    for (let i=0; i<reminders.length; i++) {
         const r = reminders[i];
         const dx = e.offsetX - r.x;
         const dy = e.offsetY - r.y;
-        if(Math.hypot(dx,dy)<=r.radius){
-            // Pop confetti
-            for(let j=0;j<20;j++){
+        if (Math.hypot(dx, dy) <= r.radius) {
+            // Confetti
+            for (let j=0; j<20; j++) {
                 const dx = Math.random()*40-20;
                 const dy = Math.random()*40-20;
                 ctx.beginPath();
