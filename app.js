@@ -99,11 +99,17 @@ saveBtn.onclick = () => {
     const maxRadius = Math.min(canvas.width, canvas.height)*0.45; // half screen
     const minRadius = 30;
 
-    // Date curve: short deadlines huge, long deadlines smaller
-    const dateFactor = Math.log(31)/Math.log(diffDays + 1); // 1 day = big, 30+ days = small
+    // Date curve: short deadlines bigger, long deadlines smaller
     const importanceFactor = importance / 5;
-    const radius = minRadius + dateFactor*0.8*maxRadius + importanceFactor*0.2*maxRadius;
-
+    
+    // Use inverse proportional scaling for diffDays
+    // 1 day → dateFactor = 1, 7 days → 0.7, 30 days → 0.4, 180 days → 0.2
+    let dateFactor = 1 / Math.log2(diffDays + 1); 
+    if(dateFactor > 1) dateFactor = 1;
+    
+    // Combine size
+    const radius = minRadius + dateFactor*0.5*maxRadius + importanceFactor*0.2*maxRadius;
+   
     // ------------------ Position non-overlapping ------------------
     let x, y, safe, attempts = 0;
     while(true){
@@ -176,3 +182,4 @@ canvas.addEventListener("click", e=>{
 });
 
 draw();
+
