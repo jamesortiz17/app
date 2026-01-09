@@ -11,7 +11,7 @@ canvas.height = window.innerHeight;
 let reminders = [];
 let usedColors = [];
 
-// Rainbow calm colors
+// Calm rainbow colors
 const rainbowColors = ["#fca5a5","#fdba74","#fef08a","#86efac","#93c5fd","#f9a8d4"];
 
 // ------------------ Populate dropdowns ------------------
@@ -95,12 +95,14 @@ saveBtn.onclick = () => {
     usedColors.push(color);
 
     // ------------------ Size calculation ------------------
-    // Date contributes ~80%, importance 20%
     const diffDays = Math.max(1, (deadline - now)/(1000*60*60*24));
-    const dateFactor = Math.min(1, 7/Math.sqrt(diffDays)); // 1 = today, smaller as further away
+    const maxRadius = Math.min(canvas.width, canvas.height)*0.45; // half screen
+    const minRadius = 30;
+
+    // Date curve: short deadlines huge, long deadlines smaller
+    const dateFactor = Math.log(31)/Math.log(diffDays + 1); // 1 day = big, 30+ days = small
     const importanceFactor = importance / 5;
-    const minRadius = 25;
-    const radius = minRadius + dateFactor*80*0.8 + importanceFactor*80*0.2; // combined
+    const radius = minRadius + dateFactor*0.8*maxRadius + importanceFactor*0.2*maxRadius;
 
     // ------------------ Position non-overlapping ------------------
     let x, y, safe, attempts = 0;
@@ -112,7 +114,6 @@ saveBtn.onclick = () => {
         attempts++;
     }
 
-    // Reduce size if couldn't fit
     let reducedRadius = radius;
     while(!safe && reducedRadius>20){
         reducedRadius -= 5;
@@ -155,12 +156,16 @@ canvas.addEventListener("click", e=>{
         const dx = e.offsetX - r.x;
         const dy = e.offsetY - r.y;
         if(Math.hypot(dx,dy)<=r.radius){
-            // Confetti
-            for(let j=0;j<20;j++){
-                const dx = Math.random()*40-20;
-                const dy = Math.random()*40-20;
+            // Confetti animation
+            const confettiCount = 30;
+            for(let j=0;j<confettiCount;j++){
+                const angle = Math.random()*2*Math.PI;
+                const dist = Math.random()*r.radius;
+                const cx = r.x + Math.cos(angle)*dist;
+                const cy = r.y + Math.sin(angle)*dist;
+                const size = Math.random()*6 + 2;
                 ctx.beginPath();
-                ctx.arc(r.x+dx, r.y+dy,5,0,Math.PI*2);
+                ctx.arc(cx, cy, size, 0, Math.PI*2);
                 ctx.fillStyle = r.color;
                 ctx.fill();
             }
